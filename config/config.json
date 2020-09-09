@@ -1,0 +1,15 @@
+{
+  "app": {
+    "name": "file",
+    "url": "http://localhost",
+    "addr": ":8888"
+  },
+  "redis": {
+    "db": "root",
+    "password": "123456",
+    "host": "127.0.0.1:6379"
+  },
+  "auth": {
+    "url": ""
+  }
+}
