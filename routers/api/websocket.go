@@ -7,12 +7,18 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"ws/pkg/app"
 	"ws/service"
 )
 
-type InputData struct {
-	Group   []string `json:"group" binding:"required"`
-	Message string   `json:"message" binding:"required"`
+type sendGroupData struct {
+	Message string   `json:"message" valid:"Required"`
+	Group   []string `json:"group" valid:"Required"`
+}
+
+type sendClientData struct {
+	Message string   `json:"message" valid:"Required"`
+	Client  []string `json:"client" valid:"Required"`
 }
 
 func WebsocketServe(c *gin.Context) {
@@ -62,10 +68,11 @@ func WebsocketServe(c *gin.Context) {
 	service.Manager.ConnectChan <- client
 }
 
-func Send(c *gin.Context) {
-	input := new(InputData)
-	if err := c.ShouldBind(input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+func Send2Group(c *gin.Context) {
+	input := new(sendGroupData)
+
+	if err := app.BindAndValid(c, input); err != nil {
+		c.JSON(http.StatusPaymentRequired, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -76,6 +83,21 @@ func Send(c *gin.Context) {
 				client.Message <- []byte(input.Message)
 				sent[client.ClientId] = true
 			}
+		}
+	}
+}
+
+func Send2Client(c *gin.Context) {
+	input := new(sendClientData)
+
+	if err := app.BindAndValid(c, input); err != nil {
+		c.JSON(http.StatusPaymentRequired, gin.H{"message": err.Error()})
+		return
+	}
+
+	for _, v := range input.Client {
+		if client, ok := service.Manager.ClientMap[v]; ok {
+			client.Message <- []byte(input.Message)
 		}
 	}
 }
