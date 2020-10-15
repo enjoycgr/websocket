@@ -11,7 +11,7 @@ type ClientManager struct {
 	ConnectChan    chan *Client
 	DisconnectChan chan *Client
 
-	Group     map[string]map[string]*Client
+	Group     map[uint]map[string]*Client
 	GroupLock sync.RWMutex
 }
 
@@ -22,7 +22,7 @@ func NewClientManager() *ClientManager {
 		ClientMap:      make(map[string]*Client),
 		ConnectChan:    make(chan *Client, 1000),
 		DisconnectChan: make(chan *Client, 1000),
-		Group:          make(map[string]map[string]*Client),
+		Group:          make(map[uint]map[string]*Client),
 	}
 }
 
@@ -41,7 +41,7 @@ func (m *ClientManager) Connect(c *Client) {
 	m.ClientMapLock.Lock()
 	defer m.ClientMapLock.Unlock()
 
-	m.ClientMap[c.ClientId] = c
+	m.ClientMap[c.ClientID] = c
 	m.addClient2Group(c)
 	go c.WritePump()
 }
@@ -51,7 +51,7 @@ func (m *ClientManager) Disconnect(c *Client) {
 	defer m.ClientMapLock.Unlock()
 
 	m.deleteClientFromGroup(c)
-	delete(m.ClientMap, c.ClientId)
+	delete(m.ClientMap, c.ClientID)
 	c.Conn.Close()
 	c = nil
 }
@@ -64,7 +64,7 @@ func (m *ClientManager) addClient2Group(c *Client) {
 		if _, ok := m.Group[v]; ok == false {
 			m.Group[v] = make(map[string]*Client)
 		}
-		m.Group[v][c.ClientId] = c
+		m.Group[v][c.ClientID] = c
 	}
 }
 
@@ -73,6 +73,6 @@ func (m *ClientManager) deleteClientFromGroup(c *Client) {
 	defer m.GroupLock.Unlock()
 
 	for _, v := range c.GroupList {
-		delete(m.Group[v], c.ClientId)
+		delete(m.Group[v], c.ClientID)
 	}
 }

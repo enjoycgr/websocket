@@ -15,6 +15,10 @@ func main() {
 
 	database.DB.AutoMigrate(
 		&models.ClientMessage{},
+		&models.GroupMessage{},
+		&models.GroupMessageRead{},
+		&models.Group{},
+		&models.GroupClient{},
 	)
 
 	err := http.ListenAndServe(":8888", r)

@@ -17,13 +17,13 @@ const (
 )
 
 type Client struct {
-	ClientId    string          // 标识ID
+	ClientID    string          // 标识ID
 	Conn        *websocket.Conn // 用户连接
 	Message     chan []byte
 	ConnectTime uint64 // 首次连接时间
 	IsDeleted   bool   // 是否删除或下线
 	Extend      string // 扩展字段，用户可以自定义
-	GroupList   []string
+	GroupList   []uint
 }
 
 func (c *Client) WritePump() {

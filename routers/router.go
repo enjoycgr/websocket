@@ -12,5 +12,12 @@ func InitRouter() *gin.Engine {
 	r.POST("/send2group", api.Send2Group)
 	r.GET("/ws", api.WebsocketServe)
 
+	r.POST("/group", api.CreateGroup)
+	r.DELETE("/group/:id", api.DeleteGroup)
+	r.POST("/group/:id/client", api.AddClient2Group)
+	r.DELETE("/group/:id/client", api.RemoveClientFromGroup)
+
+	r.GET("/message/client", api.ClientMessage)
+	//r.GET("/message/group", api.GroupMessage)
 	return r
 }

@@ -5,10 +5,11 @@ import (
 	"time"
 )
 
-type ClientMessage struct {
+type MessageStatus struct {
 	ID        uint `gorm:"primary_key"`
-	ClientId  string
-	Message   string
+	Read      uint8
+	ClientID  uint
+	MessageID uint
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt

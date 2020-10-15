@@ -7,20 +7,10 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"ws/pkg/app"
 	"ws/service"
 )
 
-type sendGroupData struct {
-	Message string   `json:"message" valid:"Required"`
-	Group   []string `json:"group" valid:"Required"`
-}
-
-type sendClientData struct {
-	Message string   `json:"message" valid:"Required"`
-	Client  []string `json:"client" valid:"Required"`
-}
-
+// 连接websocket
 func WebsocketServe(c *gin.Context) {
 	conn, err := (&websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -57,7 +47,7 @@ func WebsocketServe(c *gin.Context) {
 	}
 
 	client := &service.Client{
-		ClientId:    auth.Uid,
+		ClientID:    auth.Uid,
 		Conn:        conn,
 		Message:     make(chan []byte, 256),
 		ConnectTime: uint64(time.Now().Unix()),
@@ -66,38 +56,4 @@ func WebsocketServe(c *gin.Context) {
 	}
 
 	service.Manager.ConnectChan <- client
-}
-
-func Send2Group(c *gin.Context) {
-	input := new(sendGroupData)
-
-	if err := app.BindAndValid(c, input); err != nil {
-		c.JSON(http.StatusPaymentRequired, gin.H{"message": err.Error()})
-		return
-	}
-
-	sent := make(map[string]bool)
-	for _, v := range input.Group {
-		for _, client := range service.Manager.Group[v] {
-			if _, ok := sent[client.ClientId]; ok == false {
-				client.Message <- []byte(input.Message)
-				sent[client.ClientId] = true
-			}
-		}
-	}
-}
-
-func Send2Client(c *gin.Context) {
-	input := new(sendClientData)
-
-	if err := app.BindAndValid(c, input); err != nil {
-		c.JSON(http.StatusPaymentRequired, gin.H{"message": err.Error()})
-		return
-	}
-
-	for _, v := range input.Client {
-		if client, ok := service.Manager.ClientMap[v]; ok {
-			client.Message <- []byte(input.Message)
-		}
-	}
 }

@@ -2,7 +2,7 @@ package service
 
 type Auth struct {
 	Code  string `json:"code"`
-	Group []string
+	Group []uint
 	Uid   string
 }
 
@@ -21,6 +21,6 @@ func (a *Auth) Authorized() error {
 	//a.Uid = response.Header.Get("uid")
 
 	a.Uid = a.Code
-	a.Group = []string{"teacher", "student"}
+	a.Group = []uint{1, 2}
 	return nil
 }
